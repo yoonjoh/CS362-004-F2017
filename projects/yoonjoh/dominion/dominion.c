@@ -5,6 +5,159 @@
 #include <math.h>
 #include <stdlib.h>
 
+//Refactored Adventurer Card with Bug that 
+//changes the amount of Treasure cards you come across from 2 to 8
+int adventurerCard (struct gameState *state)
+{
+  int drawntreasure = 0;
+  int temphand[MAX_HAND];
+  int cardDrawn;
+  int z = 0;
+  int currentPlayer = whoseTurn(state);
+
+  //BUG IS HERE
+  while(drawntreasure < 8)
+  {
+    if (state->deckCount[currentPlayer] < 1)
+    {//if the deck is empty we need to shuffle discard and add to deck
+      shuffle(currentPlayer, state);
+    }
+    drawCard(currentPlayer, state);
+    //top card of hand is most recently drawn card.
+    cardDrawn = state->hand[currentPlayer][state->handCount[currentPlayer] - 1];
+    if (cardDrawn == copper || cardDrawn == silver || cardDrawn == gold)
+      drawntreasure++;
+    else
+    {
+      temphand[z]=cardDrawn;
+      //this should just remove the top card (the most recently drawn one).
+      state->handCount[currentPlayer]--; 
+      z++;
+    }
+  }
+  while(z - 1 >= 0)
+  { // discard all cards in play that have been drawn
+    state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z - 1]; 
+    z = z - 1;
+  }
+  return 0;
+}
+
+//Refactored Smithy Card with Bug that 
+//changes the amount of cards the user draws from 3 to 9
+int smithyCard(struct gameState *state, int handPos)
+{
+  int i;
+  int currentPlayer = whoseTurn(state);
+
+  //BUG IS HERE
+  for (i = 0; i < 9; i++)
+  {
+    drawCard(currentPlayer, state);
+  }
+      
+  //discard card from hand
+  discardCard(handPos, currentPlayer, state, 0);
+  return 0;
+}
+
+//Refactored Mine Card with Bug that
+//changes the gained card placement from hand to deck
+int mineCard(struct gameState *state, int handPos, int choice1, int choice2)
+{
+  int i;
+  int j;
+  int currentPlayer = whoseTurn(state);
+
+  j = state->hand[currentPlayer][choice1];  //store card we will trash
+
+  if (state->hand[currentPlayer][choice1] < copper || state->hand[currentPlayer][choice1] > gold)
+  {
+    return -1;
+  }
+    
+  if (choice2 > treasure_map || choice2 < curse)
+  {
+    return -1;
+  }
+
+  if ( (getCost(state->hand[currentPlayer][choice1]) + 3) > getCost(choice2) )
+  {
+    return -1;
+  }
+
+  //BUG IS HERE
+  gainCard(choice2, state, 1, currentPlayer);
+
+  //discard card from hand
+  discardCard(handPos, currentPlayer, state, 0);
+
+  //discard trashed card
+  for (i = 0; i < state->handCount[currentPlayer]; i++)
+  {
+    if (state->hand[currentPlayer][i] == j)
+      {
+        discardCard(i, currentPlayer, state, 0);      
+        break;
+      }
+  }
+      
+  return 0;
+}
+
+
+//Refactored Remodel Card with Bug that
+//changes the gained card placement from discarded pile to hand
+int remodelCard(struct gameState *state, int handPos, int choice1, int choice2)
+{
+  int i;
+  int j;
+  int currentPlayer = whoseTurn(state);
+
+  j = state->hand[currentPlayer][choice1];  //store card we will trash
+
+  if ( (getCost(state->hand[currentPlayer][choice1]) + 2) > getCost(choice2) )
+  {
+    return -1;
+  }
+
+  //BUG IS HERE
+  gainCard(choice2, state, 2, currentPlayer);
+
+  //discard card from hand
+  discardCard(handPos, currentPlayer, state, 0);
+
+  //discard trashed card
+  for (i = 0; i < state->handCount[currentPlayer]; i++)
+  {
+    if (state->hand[currentPlayer][i] == j)
+      {
+        discardCard(i, currentPlayer, state, 0);      
+        break;
+      }
+  }
+  return 0;
+}
+
+
+//Refactored Village Card WITHOUT Bug 
+int villageCard(struct gameState *state, int handPos)
+{ 
+  int currentPlayer = whoseTurn(state);
+  //+1 Card
+  drawCard(currentPlayer, state);
+      
+  //+2 Actions
+  state->numActions = state->numActions + 2;
+      
+  //discard played card from hand
+  discardCard(handPos, currentPlayer, state, 0);
+  return 0;
+}
+
+
+
+
 int compare(const void* a, const void* b) {
   if (*(int*)a > *(int*)b)
     return 1;
@@ -667,7 +820,8 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
   switch( card ) 
     {
     case adventurer:
-      while(drawntreasure<2){
+      adventurerCard(state);
+      /*while(drawntreasure<2){
 	if (state->deckCount[currentPlayer] <1){//if the deck is empty we need to shuffle discard and add to deck
 	  shuffle(currentPlayer, state);
 	}
@@ -685,7 +839,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 	state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
 	z=z-1;
       }
-      return 0;
+      return 0;*/
 			
     case council_room:
       //+4 Cards
@@ -768,7 +922,8 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
       return -1;
 			
     case mine:
-      j = state->hand[currentPlayer][choice1];  //store card we will trash
+      mineCard(state, handPos, choice1, choice2);
+      /*j = state->hand[currentPlayer][choice1];  //store card we will trash
 
       if (state->hand[currentPlayer][choice1] < copper || state->hand[currentPlayer][choice1] > gold)
 	{
@@ -800,10 +955,11 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 	    }
 	}
 			
-      return 0;
+      return 0;*/
 			
     case remodel:
-      j = state->hand[currentPlayer][choice1];  //store card we will trash
+      remodelCard(state, handPos, choice1, choice2);
+      /*j = state->hand[currentPlayer][choice1];  //store card we will trash
 
       if ( (getCost(state->hand[currentPlayer][choice1]) + 2) > getCost(choice2) )
 	{
@@ -826,10 +982,11 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 	}
 
 
-      return 0;
+      return 0;*/
 		
     case smithy:
-      //+3 Cards
+      smithyCard(state, handPos);
+      /*//+3 Cards
       for (i = 0; i < 3; i++)
 	{
 	  drawCard(currentPlayer, state);
@@ -837,10 +994,11 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 			
       //discard card from hand
       discardCard(handPos, currentPlayer, state, 0);
-      return 0;
+      return 0;*/
 		
     case village:
-      //+1 Card
+      villageCard(state, handPos);
+      /*//+1 Card
       drawCard(currentPlayer, state);
 			
       //+2 Actions
@@ -848,7 +1006,7 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 			
       //discard played card from hand
       discardCard(handPos, currentPlayer, state, 0);
-      return 0;
+      return 0;*/
 		
     case baron:
       state->numBuys++;//Increase buys by 1!
