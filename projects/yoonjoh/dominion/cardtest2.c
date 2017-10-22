@@ -25,7 +25,6 @@ void testSmithy()
 	int handpos = 0, choice1 = 0, choice2 = 0, choice3 = 0, bonus = 0;
 
 	r = initializeGame(numPlayer, k, seed, &G);
-	memcpy(&testG, &G, sizeof(struct gameState));
 
 	int oldTotal = testG.handCount[thisPlayer];
 	
