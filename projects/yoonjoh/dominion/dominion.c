@@ -16,7 +16,7 @@ int adventurerCard (struct gameState *state)
   int currentPlayer = whoseTurn(state);
 
   //BUG IS HERE
-  while(drawntreasure < 8)
+  while(drawntreasure < 2)
   {
     if (state->deckCount[currentPlayer] < 1)
     {//if the deck is empty we need to shuffle discard and add to deck
@@ -808,9 +808,9 @@ int cardEffect(int card, int choice1, int choice2, int choice3, struct gameState
 
   int tributeRevealedCards[2] = {-1, -1};
   int temphand[MAX_HAND];// moved above the if statement
-  int drawntreasure=0;
+  /*int drawntreasure=0;
   int cardDrawn;
-  int z = 0;// this is the counter for the temp hand
+  int z = 0;// this is the counter for the temp hand*/
   if (nextPlayer > (state->numPlayers - 1)){
     nextPlayer = 0;
   }

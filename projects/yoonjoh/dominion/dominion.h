@@ -10,6 +10,12 @@
 
 #define DEBUG 0
 
+
+/*int adventurerCard (struct gameState *state);
+int smithyCard(struct gameState *state, int handPos);
+int mineCard(struct gameState *state, int handPos, int choice1, int choice2);
+int remodelCard(struct gameState *state, int handPos, int choice1, int choice2);*/
+
 /* http://dominion.diehrstraits.com has card texts */
 /* http://dominion.isotropic.org has other stuff */
 
