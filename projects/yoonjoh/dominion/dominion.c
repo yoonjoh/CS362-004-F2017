@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 //Refactored Adventurer Card with Bug that 
-//changes the amount of Treasure cards you come across from 2 to 8
+//changes the amount of Treasure cards you come across from 2 to 3
 int adventurerCard (struct gameState *state)
 {
   int drawntreasure = 0;
@@ -16,7 +16,7 @@ int adventurerCard (struct gameState *state)
   int currentPlayer = whoseTurn(state);
 
   //BUG IS HERE
-  while(drawntreasure < 2)
+  while(drawntreasure < 3)
   {
     if (state->deckCount[currentPlayer] < 1)
     {//if the deck is empty we need to shuffle discard and add to deck
